@@ -1,8 +1,8 @@
 package akkadesign.test
 
-import SimpleMSG.{Crash, Hi}
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.Props
-import akkadesign.Start.{ActorFour, ActorThree, ActorTwo}
+import akkadesign.Start.{ActorFour, ActorTwo}
 import akkadesign.app.SimpleApp
 
 /**
@@ -12,7 +12,7 @@ import akkadesign.app.SimpleApp
 object TestActorFour {
   def main(args: Array[String]): Unit = {
     val system = SimpleApp.startupSignal()
-    val childActor = system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
+    system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
     val actone = system.actorOf(Props[ActorFour],"actorFour")
     actone ! Hi
     actone ! Hi

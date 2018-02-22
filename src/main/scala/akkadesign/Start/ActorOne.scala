@@ -1,8 +1,8 @@
 package akkadesign.Start
 
-import SimpleMSG._
+import akkadesign.msg.SimpleMSG._
 import akka.actor.{Actor, ActorLogging}
-import play.api.libs.json.JsResult.Exception
+
 
 /**
   * For akkadesign.Start in AkkaDesign

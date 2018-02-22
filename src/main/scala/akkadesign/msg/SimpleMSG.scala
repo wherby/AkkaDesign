@@ -1,4 +1,4 @@
-package
+package akkadesign.msg
 
 /**
   * For akkadesign.msg in AkkaDesign

@@ -1,7 +1,7 @@
 package akkadesign.Start
 
-import SimpleMSG.{Crash, Hi}
-import akka.actor.{Actor, ActorLogging, Props}
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging}
 
 /**
   * For akkadesign.Start in AkkaDesign

@@ -9,7 +9,6 @@ import com.typesafe.config.ConfigFactory
   */
 object SimpleApp {
   def startup(ports: Seq[String]): Seq[ActorSystem] = {
-    val config = ConfigFactory.load()
     val systems = ports map { port =>
       val sysConfig = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + port)
         .withFallback(ConfigFactory.load())

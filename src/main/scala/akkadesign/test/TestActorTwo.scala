@@ -1,5 +1,5 @@
 package akkadesign.test
-import SimpleMSG._
+import akkadesign.msg.SimpleMSG._
 import akka.actor.Props
 import akkadesign.Start.{ ActorTwo}
 import akkadesign.app.SimpleApp
