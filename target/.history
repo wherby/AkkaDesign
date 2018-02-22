@@ -1,0 +1,3 @@
+run
+;reload; set _root_.org.jetbrains.sbt.StructureKeys.sbtStructureOptions in Global := "download resolveClassifiers" ;*/*:dumpStructureTo C:/Users/where/AppData/Local/Temp/sbt-structure.xml
+all {file:/C:/Users/where/Documents/github/AkkaDesign/}AkkaDesign/products {file:/C:/Users/where/Documents/github/AkkaDesign/}AkkaDesign/test:products

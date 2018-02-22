@@ -1,0 +1,17 @@
+[0m[[0m[33mwarn[0m] [0m[0mC:\Users\where\Documents\github\AkkaDesign\src\main\scala\akkadesign\msg\SimpleMSG.scala:8:14: it is not recommended to define classes/objects inside of package objects.[0m
+[0m[[0m[33mwarn[0m] [0m[0mIf possible, define class Hi in package SimpleMSG instead.[0m
+[0m[[0m[33mwarn[0m] [0m[0m  case class Hi()[0m
+[0m[[0m[33mwarn[0m] [0m[0m             ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\Users\where\Documents\github\AkkaDesign\src\main\scala\akkadesign\msg\SimpleMSG.scala:10:20: it is not recommended to define classes/objects inside of package objects.[0m
+[0m[[0m[33mwarn[0m] [0m[0mIf possible, define class Crash in package SimpleMSG instead.[0m
+[0m[[0m[33mwarn[0m] [0m[0m  final case class Crash()[0m
+[0m[[0m[33mwarn[0m] [0m[0m                   ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\Users\where\Documents\github\AkkaDesign\src\main\scala\akkadesign\msg\SimpleMSG.scala:12:20: it is not recommended to define classes/objects inside of package objects.[0m
+[0m[[0m[33mwarn[0m] [0m[0mIf possible, define class Ack in package SimpleMSG instead.[0m
+[0m[[0m[33mwarn[0m] [0m[0m  final case class Ack()[0m
+[0m[[0m[33mwarn[0m] [0m[0m                   ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mthree warnings found[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\Users\where\Documents\github\AkkaDesign\src\main\scala\akkadesign\Start\ActorOne.scala:5:36: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport play.api.libs.json.JsResult.Exception[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                   ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
