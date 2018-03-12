@@ -12,16 +12,16 @@ import akkadesign.app.SimpleApp
 object TestActorThree {
   def main(args: Array[String]): Unit = {
     val system = SimpleApp.startupSignal()
-    val actone = system.actorOf(Props[ActorThree],"actorThree")
-    actone ! Hi
-    actone ! Hi
-    actone ! Hi
-    actone ! Hi
-    actone ! Hi
+    val actthree = system.actorOf(Props[ActorThree],"actorThree")
+    actthree ! Hi
+    actthree ! Hi
+    actthree ! Hi
+    actthree ! Hi
+    actthree ! Hi
     Thread.sleep(1999)
-    actone ! Crash
-    actone ! Hi
-    actone ! "test"
+    actthree ! Crash
+    actthree ! Hi
+    actthree ! "test"
   }
 }
 

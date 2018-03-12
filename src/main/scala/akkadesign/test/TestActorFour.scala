@@ -13,15 +13,15 @@ object TestActorFour {
   def main(args: Array[String]): Unit = {
     val system = SimpleApp.startupSignal()
     system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
-    val actone = system.actorOf(Props[ActorFour],"actorFour")
-    actone ! Hi
-    actone ! Hi
-    actone ! Hi
-    actone ! Hi
-    actone ! Hi
+    val actfour = system.actorOf(Props[ActorFour],"actorFour")
+    actfour ! Hi
+    actfour ! Hi
+    actfour ! Hi
+    actfour ! Hi
+    actfour ! Hi
     Thread.sleep(1999)
-    actone ! Crash
-    actone ! Hi
-    actone ! "test"
+    actfour ! Crash
+    actfour ! Hi
+    actfour ! "test"
   }
 }
