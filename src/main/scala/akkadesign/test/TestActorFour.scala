@@ -2,7 +2,7 @@ package akkadesign.test
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.Props
-import akkadesign.Start.{ActorFour, ActorTwo}
+import akkadesign.start.{ActorFour, ActorTwo}
 import akkadesign.app.SimpleApp
 
 /**

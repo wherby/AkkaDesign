@@ -1,4 +1,4 @@
-package akkadesign.Start
+package akkadesign.start
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.{Actor, ActorLogging, Props}

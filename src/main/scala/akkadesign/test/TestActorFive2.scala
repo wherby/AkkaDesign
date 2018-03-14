@@ -3,7 +3,7 @@ package akkadesign.test
 import akka.actor.{ActorRef, ActorSystem, OneForOneStrategy, Props}
 import akka.actor.SupervisorStrategy.Restart
 import akka.util.Timeout
-import akkadesign.Start.ActorTwo
+import akkadesign.start.ActorTwo
 import akkadesign.advance.ActorFive
 import akkadesign.app.SimpleApp
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
