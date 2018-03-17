@@ -9,7 +9,7 @@ import akkadesign.msg.SimpleMSG.{Crash, Hi}
   * For akkadesign.test in AkkaDesign
   * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
   */
-object TestForActorOne2 {
+object TestActorOne2 {
   def main(args: Array[String]): Unit = {
     val system = SimpleApp.startupSignal()
     val actone = system.actorOf(Props[ActorOne],"actorOne")
