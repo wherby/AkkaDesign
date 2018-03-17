@@ -3,7 +3,7 @@ package akkadesign.test
 import akkadesign.msg.SimpleMSG._
 import akka.actor.Props
 import akkadesign.app.SimpleApp
-import akkadesign.Start.ActorOne
+import akkadesign.start.ActorOne
 
 /**
   * Created by TaoZhou(whereby@live.cn) on 13/10/2017.
