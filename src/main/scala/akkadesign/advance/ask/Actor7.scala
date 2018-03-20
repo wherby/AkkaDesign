@@ -16,11 +16,20 @@ class Actor7 extends Actor with ActorLogging{
 
   val child1 = context.actorOf(Props[Actor71],"child1")
   val child2 = context.actorOf(Props[Actor72],"child2")
+
   def receive = {
     case Hi => child2! Hi
       val reply= (child1 ? Hi) map{
         a => log.info("Received : " + a.toString)
       }
+
+    case "TEST" =>{
+      log.info("Start TEST ")
+      val reply= (child2 ? Hi) map{
+        a => log.info("Received : " + a.toString)
+      }
+    }
+
     case Crash =>
       log.info("crashing...")
       throw new RuntimeException("Crashed")

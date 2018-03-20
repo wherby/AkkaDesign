@@ -16,8 +16,15 @@ class Actor72 extends Actor with ActorLogging {
   def receive = {
     case Hi => log.debug("Start TICK...")
       if(cancellable == None){
+        log.info("FIRST HI")
         replyTo = sender()
         cancellable= Some(context.system.scheduler.schedule(0 seconds, 4 second, self, "test"))
+
+        sender() ! "FIRST"
+      }else{
+        Thread.sleep(10000)
+        sender() !"SECOND"
+        replyTo ! "Reply from Actor72 in HI"
       }
     case Crash =>
       log.info("crashing...")
