@@ -12,7 +12,7 @@ import akkadesign.msg.SimpleMSG.{Crash, Hi}
   */
 object TestActorSix {
   def main(args: Array[String]): Unit = {
-    val system = SimpleApp.startupSignal()
+    val system = SimpleApp.startupSingle()
     system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
     val actfive = system.actorOf(Props[ActorSix],"actorSix")
     Thread.sleep(1999)

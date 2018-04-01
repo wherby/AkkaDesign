@@ -11,7 +11,7 @@ import akkadesign.msg.SimpleMSG.Hi
   */
 object TestActor7 {
   def main(args: Array[String]): Unit = {
-    val system = SimpleApp.startupSignal()
+    val system = SimpleApp.startupSingle()
     val actor7= system.actorOf(Props[Actor7], "Actor7")
     actor7 ! Hi
 

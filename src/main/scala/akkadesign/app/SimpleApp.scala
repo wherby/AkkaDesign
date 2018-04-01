@@ -18,7 +18,7 @@ object SimpleApp {
     systems
   }
 
-  def startupSignal(): ActorSystem = {
+  def startupSingle(): ActorSystem = {
     val system = ActorSystem("akkadesign")
     system
   }

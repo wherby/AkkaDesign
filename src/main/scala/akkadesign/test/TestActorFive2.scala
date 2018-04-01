@@ -41,7 +41,7 @@ object TestActorFive2 {
   }
 
   def main(args: Array[String]): Unit = {
-    val system = SimpleApp.startupSignal()
+    val system = SimpleApp.startupSingle()
     system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
     var actfive:ActorRef = null
 

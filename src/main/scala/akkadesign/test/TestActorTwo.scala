@@ -10,7 +10,7 @@ import akkadesign.app.SimpleApp
   */
 object TestActorTwo {
 def main(args: Array[String]): Unit = {
-    val system = SimpleApp.startupSignal()
+    val system = SimpleApp.startupSingle()
     val actone = system.actorOf(Props[ActorTwo],"actorTwo")
     actone ! Hi
     actone ! Crash
