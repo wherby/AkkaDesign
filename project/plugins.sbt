@@ -7,3 +7,4 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.0-M1")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.5")
 
 addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.6.8")
+addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
