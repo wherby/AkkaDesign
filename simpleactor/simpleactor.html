@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>First simple actor · Akka design</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='Akka design case'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Akka design
+</a>
+<div class="version-number">
+9de6585c+20200707-1424
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../simpleactor/simpleactor.html" class="active page">First simple actor</a></li>
+  <li><a href="../isolatedactor/index.html" class="page">Isolate error</a>
+  <ul>
+    <li><a href="../isolatedactor/reference.html" class="page">Restarting for child actor</a></li>
+  </ul></li>
+  <li><a href="../advanced/resilience.html" class="page">Resilience</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Akka design</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Akka design
+</a>
+<div class="version-number">
+9de6585c+20200707-1424
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../simpleactor/simpleactor.html" class="active page">First simple actor</a></li>
+  <li><a href="../isolatedactor/index.html" class="page">Isolate error</a>
+  <ul>
+    <li><a href="../isolatedactor/reference.html" class="page">Restarting for child actor</a></li>
+  </ul></li>
+  <li><a href="../advanced/resilience.html" class="page">Resilience</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Akka design</a></li>
+  <li>First simple actor</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#first-simple-actor" name="first-simple-actor" class="anchor"><span class="anchor-link"></span></a>First simple actor</h1>
+<h2><a href="#simple-actor-without-state" name="simple-actor-without-state" class="anchor"><span class="anchor-link"></span></a>Simple actor without state</h2>
+<dl>
+  <dt>Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorOne.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG._
+import akka.actor.{Actor, ActorLogging}
+
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorOne extends Actor with ActorLogging{
+  def receive = {
+    case Hi =&gt; log.info(&quot;hi&quot;)
+    case Crash =&gt;
+      log.info(&quot;crashing...&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg:String=&gt; log.info(msg)
+  }
+}</code></pre></dd>
+  <dt>Msg define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/msg/SimpleMSG.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.msg
+
+/**
+  * For akkadesign.msg in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+object SimpleMSG {
+  case class Hi()
+
+  final case class Crash()
+
+  final case class Ack()
+
+
+}</code></pre></dd>
+  <dt>Test</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorOne.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+
+import akkadesign.msg.SimpleMSG._
+import akka.actor.Props
+import akkadesign.app.SimpleApp
+import akkadesign.start.ActorOne
+
+/**
+  * Created by TaoZhou(whereby@live.cn) on 13/10/2017.
+  */
+object TestActorOne {
+  def main(args: Array[String]): Unit = {
+    val system = SimpleApp.startupSingle()
+    val actone = system.actorOf(Props[ActorOne],&quot;actorOne&quot;)
+    actone ! Hi
+    actone ! Crash
+    actone ! Hi
+    actone ! &quot;test&quot;
+  }
+}</code></pre></dd>
+  <dt>Testlog</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result1.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt">[INFO] [07/01/2020 17:42:38.654] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorOne] hi
+[INFO] [07/01/2020 17:42:38.654] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorOne] crashing...
+[WARN] [07/01/2020 17:42:38.657] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[ERROR] [07/01/2020 17:42:38.664] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorOne] Crashed
+java.lang.RuntimeException: Crashed
+	at akkadesign.start.ActorOne$$anonfun$receive$1.applyOrElse(ActorOne.scala:16)
+	at akka.actor.Actor.aroundReceive(Actor.scala:517)
+	at akka.actor.Actor.aroundReceive$(Actor.scala:515)
+	at akkadesign.start.ActorOne.aroundReceive(ActorOne.scala:11)
+	at akka.actor.ActorCell.receiveMessage(ActorCell.scala:527)
+	at akka.actor.ActorCell.invoke(ActorCell.scala:496)
+	at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:257)
+	at akka.dispatch.Mailbox.run(Mailbox.scala:224)
+	at akka.dispatch.Mailbox.exec(Mailbox.scala:234)
+	at akka.dispatch.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)
+	at akka.dispatch.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)
+	at akka.dispatch.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)
+	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
+
+[INFO] [07/01/2020 17:42:38.667] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorOne] hi
+[INFO] [07/01/2020 17:42:38.667] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorOne] test</code></pre></dd>
+</dl>
+<h2><a href="#simple-actor-with-state" name="simple-actor-with-state" class="anchor"><span class="anchor-link"></span></a>Simple actor with state</h2>
+<p>Actor define</p>
+<dl>
+  <dt>Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging}
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorTwo extends Actor with ActorLogging{
+  var msgList: List[Any] = Nil
+  def addMsg(msg:Any)={
+    msgList = msg ::msgList
+  }
+  def receive = {
+    case Hi =&gt; log.info(&quot;hi&quot;)
+      addMsg(Hi)
+      log.info(s&quot;All msg: $msgList&quot;)
+    case Crash =&gt;
+      addMsg(Crash)
+      log.info(&quot;crashing...&quot;)
+      log.info(s&quot;All msg: $msgList&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg:String=&gt; log.info(msg)
+      addMsg(msg)
+      log.info(s&quot;All msg: $msgList&quot;)
+  }
+}
+</code></pre></dd>
+  <dt>Test</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+import akkadesign.msg.SimpleMSG._
+import akka.actor.Props
+import akkadesign.start.{ ActorTwo}
+import akkadesign.app.SimpleApp
+
+/**
+  * For akkadesign.test in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+object TestActorTwo {
+def main(args: Array[String]): Unit = {
+    val system = SimpleApp.startupSingle()
+    val actone = system.actorOf(Props[ActorTwo],&quot;actorTwo&quot;)
+    actone ! Hi
+    actone ! Crash
+    actone ! Hi
+    actone ! &quot;test&quot;
+  }
+}</code></pre></dd>
+  <dt>Testlog</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result2.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt">[INFO] [07/01/2020 17:49:25.028] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] hi
+[INFO] [07/01/2020 17:49:25.028] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] All msg: List(Hi)
+[INFO] [07/01/2020 17:49:25.029] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] crashing...
+[INFO] [07/01/2020 17:49:25.029] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] All msg: List(Crash, Hi)
+[WARN] [07/01/2020 17:49:25.032] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[ERROR] [07/01/2020 17:49:25.038] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorTwo] Crashed
+java.lang.RuntimeException: Crashed
+	at akkadesign.start.ActorTwo$$anonfun$receive$1.applyOrElse(ActorTwo.scala:23)
+	at akka.actor.Actor.aroundReceive(Actor.scala:517)
+	at akka.actor.Actor.aroundReceive$(Actor.scala:515)
+	at akkadesign.start.ActorTwo.aroundReceive(ActorTwo.scala:10)
+	at akka.actor.ActorCell.receiveMessage(ActorCell.scala:527)
+	at akka.actor.ActorCell.invoke(ActorCell.scala:496)
+	at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:257)
+	at akka.dispatch.Mailbox.run(Mailbox.scala:224)
+	at akka.dispatch.Mailbox.exec(Mailbox.scala:234)
+	at akka.dispatch.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)
+	at akka.dispatch.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)
+	at akka.dispatch.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)
+	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
+
+[INFO] [07/01/2020 17:49:25.043] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] hi
+[INFO] [07/01/2020 17:49:25.043] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] All msg: List(Hi)
+[INFO] [07/01/2020 17:49:25.043] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] test
+[INFO] [07/01/2020 17:49:25.043] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] All msg: List(test, Hi)</code></pre></dd>
+</dl>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/simpleactor/simpleactor.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="../isolatedactor/index.html">Isolate error</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../simpleactor/simpleactor.html#first-simple-actor" class="header">First simple actor</a>
+  <ul>
+    <li><a href="../simpleactor/simpleactor.html#simple-actor-without-state" class="header">Simple actor without state</a></li>
+    <li><a href="../simpleactor/simpleactor.html#simple-actor-with-state" class="header">Simple actor with state</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '9de6585c+20200707-1424', '')});</script>
+
+
+</html>

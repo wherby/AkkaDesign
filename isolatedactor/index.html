@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Isolate error · Akka design</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='Akka design case'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Akka design
+</a>
+<div class="version-number">
+9de6585c+20200707-1424
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../simpleactor/simpleactor.html" class="page">First simple actor</a></li>
+  <li><a href="../isolatedactor/index.html" class="active page">Isolate error</a>
+  <ul>
+    <li><a href="../isolatedactor/reference.html" class="page">Restarting for child actor</a></li>
+  </ul></li>
+  <li><a href="../advanced/resilience.html" class="page">Resilience</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Akka design</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Akka design
+</a>
+<div class="version-number">
+9de6585c+20200707-1424
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../simpleactor/simpleactor.html" class="page">First simple actor</a></li>
+  <li><a href="../isolatedactor/index.html" class="active page">Isolate error</a>
+  <ul>
+    <li><a href="../isolatedactor/reference.html" class="page">Restarting for child actor</a></li>
+  </ul></li>
+  <li><a href="../advanced/resilience.html" class="page">Resilience</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Akka design</a></li>
+  <li>Isolate error</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#isolate-error" name="isolate-error" class="anchor"><span class="anchor-link"></span></a>Isolate error</h1>
+<h2><a href="#version-1" name="version-1" class="anchor"><span class="anchor-link"></span></a>Version 1</h2>
+<p>Store status in child actor, and parent actor may fail.</p>
+<dl>
+  <dt>Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorThree.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging, Props}
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorThree extends Actor with ActorLogging {
+  val childActor = context.actorOf(Props[ActorTwo],&quot;childActorforActorThree&quot;)
+  override def receive: Receive = {
+    case Hi =&gt; childActor ! Hi
+    case Crash =&gt; log.info(&quot;ready to crash&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg =&gt; childActor ! msg
+  }
+}</code></pre></dd>
+  <dt>Child Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging}
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorTwo extends Actor with ActorLogging{
+  var msgList: List[Any] = Nil
+  def addMsg(msg:Any)={
+    msgList = msg ::msgList
+  }
+  def receive = {
+    case Hi =&gt; log.info(&quot;hi&quot;)
+      addMsg(Hi)
+      log.info(s&quot;All msg: $msgList&quot;)
+    case Crash =&gt;
+      addMsg(Crash)
+      log.info(&quot;crashing...&quot;)
+      log.info(s&quot;All msg: $msgList&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg:String=&gt; log.info(msg)
+      addMsg(msg)
+      log.info(s&quot;All msg: $msgList&quot;)
+  }
+}
+</code></pre></dd>
+  <dt>Test</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorThree.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.Props
+import akkadesign.start.{ActorThree}
+import akkadesign.app.SimpleApp
+
+/**
+  * For akkadesign.test in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+object TestActorThree {
+  def main(args: Array[String]): Unit = {
+    val system = SimpleApp.startupSingle()
+    val actthree = system.actorOf(Props[ActorThree],&quot;actorThree&quot;)
+    actthree ! Hi
+    actthree ! Hi
+    actthree ! Hi
+    actthree ! Hi
+    actthree ! Hi
+    Thread.sleep(1999)
+    actthree ! Crash
+    actthree ! Hi
+    actthree ! &quot;test&quot;
+  }
+}
+</code></pre></dd>
+  <dt>Testlog</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result3.log" target="_blank" title="Go to snippet source"></a><code class="language-log">[INFO] [07/07/2020 14:23:02.344] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[INFO] [07/07/2020 14:23:02.377] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi)
+[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi)
+[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi)
+[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi, Hi, Hi)
+[WARN] [07/07/2020 14:23:02.382] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[INFO] [07/07/2020 14:23:02.390] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+[INFO] [07/07/2020 14:23:02.401] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+no libsigar-universal64-macosx.dylib in java.library.path
+org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
+	at org.hyperic.sigar.Sigar.loadLibrary(Sigar.java:174)
+	...
+	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
+Jul 07, 2020 2:23:02 PM kamon.sigar.SigarProvisioner provision
+INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
+[INFO] [07/07/2020 14:23:02.931] [akkadesign-akka.actor.default-dispatcher-17] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+[INFO] [07/07/2020 14:23:04.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree] ready to crash
+[ERROR] [07/07/2020 14:23:04.388] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorThree] Crashed
+...
+
+[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi)
+[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] test
+[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(test, Hi)</code></pre></dd>
+</dl>
+<p>Parent Actor will restart child actor by default.</p>
+<h2><a href="#version-2" name="version-2" class="anchor"><span class="anchor-link"></span></a>Version 2</h2>
+<p>Store status in another actor, no relationship with actor which may fail.</p>
+<dl>
+  <dt>Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorFour.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging}
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorFour extends Actor with ActorLogging {
+  val childActor = context.actorSelection(&quot;/user/MsgActorforActorFour&quot;)
+  override def receive: Receive = {
+    case Hi =&gt; childActor ! Hi
+    case Crash =&gt; log.info(&quot;ready to crash&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg =&gt; childActor ! msg
+  }
+}</code></pre></dd>
+  <dt>Another Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging}
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorTwo extends Actor with ActorLogging{
+  var msgList: List[Any] = Nil
+  def addMsg(msg:Any)={
+    msgList = msg ::msgList
+  }
+  def receive = {
+    case Hi =&gt; log.info(&quot;hi&quot;)
+      addMsg(Hi)
+      log.info(s&quot;All msg: $msgList&quot;)
+    case Crash =&gt;
+      addMsg(Crash)
+      log.info(&quot;crashing...&quot;)
+      log.info(s&quot;All msg: $msgList&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg:String=&gt; log.info(msg)
+      addMsg(msg)
+      log.info(s&quot;All msg: $msgList&quot;)
+  }
+}
+</code></pre></dd>
+  <dt>Test</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorFour.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.Props
+import akkadesign.start.{ActorFour, ActorTwo}
+import akkadesign.app.SimpleApp
+
+/**
+  * For akkadesign.test in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+object TestActorFour {
+  def main(args: Array[String]): Unit = {
+    val system = SimpleApp.startupSingle()
+    system.actorOf(Props[ActorTwo],&quot;MsgActorforActorFour&quot;)
+    val actfour = system.actorOf(Props[ActorFour],&quot;actorFour&quot;)
+    actfour ! Hi
+    actfour ! Hi
+    actfour ! Hi
+    actfour ! Hi
+    actfour ! Hi
+    Thread.sleep(1999)
+    actfour ! Crash
+    actfour ! Hi
+    actfour ! &quot;test&quot;
+  }
+}</code></pre></dd>
+  <dt>Testlog</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result4.log" target="_blank" title="Go to snippet source"></a><code class="language-log">[INFO] [07/07/2020 14:56:15.889] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 14:56:15.901] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 14:56:15.945] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 14:56:15.945] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi)
+[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi)
+[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi)
+[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi)
+[WARN] [07/07/2020 14:56:15.982] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[INFO] [07/07/2020 14:56:15.993] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+no libsigar-universal64-macosx.dylib in java.library.path
+org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
+...
+	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
+[INFO] [07/07/2020 14:56:16.005] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+Jul 07, 2020 2:56:16 PM kamon.sigar.SigarProvisioner provision
+INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
+[INFO] [07/07/2020 14:56:16.526] [akkadesign-akka.actor.default-dispatcher-16] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+[INFO] [07/07/2020 14:56:17.980] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFour] ready to crash
+[ERROR] [07/07/2020 14:56:17.988] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorFour] Crashed
+...
+[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] test
+[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(test, Hi, Hi, Hi, Hi, Hi, Hi)</code></pre></dd>
+</dl>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/isolatedactor/index.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="../isolatedactor/reference.html">Restarting for child actor</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../isolatedactor/index.html#isolate-error" class="header">Isolate error</a>
+  <ul>
+    <li><a href="../isolatedactor/index.html#version-1" class="header">Version 1</a></li>
+    <li><a href="../isolatedactor/index.html#version-2" class="header">Version 2</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '9de6585c+20200707-1424', '')});</script>
+
+
+</html>

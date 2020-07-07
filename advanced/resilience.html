@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Resilience · Akka design</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='Akka design case'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Akka design
+</a>
+<div class="version-number">
+9de6585c+20200707-1424
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../simpleactor/simpleactor.html" class="page">First simple actor</a></li>
+  <li><a href="../isolatedactor/index.html" class="page">Isolate error</a>
+  <ul>
+    <li><a href="../isolatedactor/reference.html" class="page">Restarting for child actor</a></li>
+  </ul></li>
+  <li><a href="../advanced/resilience.html" class="active page">Resilience</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Akka design</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Akka design
+</a>
+<div class="version-number">
+9de6585c+20200707-1424
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../simpleactor/simpleactor.html" class="page">First simple actor</a></li>
+  <li><a href="../isolatedactor/index.html" class="page">Isolate error</a>
+  <ul>
+    <li><a href="../isolatedactor/reference.html" class="page">Restarting for child actor</a></li>
+  </ul></li>
+  <li><a href="../advanced/resilience.html" class="active page">Resilience</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Akka design</a></li>
+  <li>Resilience</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#resilience" name="resilience" class="anchor"><span class="anchor-link"></span></a>Resilience</h1>
+<h2><a href="#actor-may-crash" name="actor-may-crash" class="anchor"><span class="anchor-link"></span></a>Actor may crash</h2>
+<dl>
+  <dt>Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/advance/ActorFive.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.advance
+
+import akka.actor.{Actor, ActorLogging}
+import akka.event.Logging
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+
+import scala.util.Random
+
+/**
+  * For akkadesign.advance in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
+  */
+class ActorFive extends Actor with ActorLogging {
+    val rand = Random.nextInt(5)
+    val start = if(rand != 0){
+      log.error(&quot;about to fail&quot;)
+      throw  new RuntimeException(&quot;Crashed for bad luck&quot;)
+    }
+
+  val childActor = context.actorSelection(&quot;/user/MsgActorforActorFive&quot;)
+  override def receive: Receive = {
+    case Hi =&gt; childActor ! Hi
+    case Crash =&gt; log.info(&quot;ready to crash&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case &quot;ping&quot; =&gt;sender() !&quot;pong&quot;
+    case msg =&gt; childActor ! msg
+
+  }
+}</code></pre></dd>
+  <dt>Child Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging}
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorTwo extends Actor with ActorLogging{
+  var msgList: List[Any] = Nil
+  def addMsg(msg:Any)={
+    msgList = msg ::msgList
+  }
+  def receive = {
+    case Hi =&gt; log.info(&quot;hi&quot;)
+      addMsg(Hi)
+      log.info(s&quot;All msg: $msgList&quot;)
+    case Crash =&gt;
+      addMsg(Crash)
+      log.info(&quot;crashing...&quot;)
+      log.info(s&quot;All msg: $msgList&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg:String=&gt; log.info(msg)
+      addMsg(msg)
+      log.info(s&quot;All msg: $msgList&quot;)
+  }
+}
+</code></pre></dd>
+  <dt>Test</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorFive.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+
+import akka.actor.Props
+import akkadesign.start.{ActorFour, ActorTwo}
+import akkadesign.advance.ActorFive
+import akkadesign.app.SimpleApp
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+
+/**
+  * For akkadesign.test in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
+  */
+object TestActorFive {
+  def main(args: Array[String]): Unit = {
+    val system = SimpleApp.startupSingle()
+    system.actorOf(Props[ActorTwo],&quot;MsgActorforActorFive&quot;)
+    val actfive = system.actorOf(Props[ActorFive],&quot;actorFive&quot;)
+    Thread.sleep(1999)
+    actfive ! Hi
+    actfive ! Hi
+    actfive ! Hi
+    actfive ! Hi
+    actfive ! Hi
+    Thread.sleep(1999)
+    actfive ! Crash
+    actfive ! Hi
+    actfive ! &quot;test&quot;
+  }
+}</code></pre></dd>
+  <dt>Testlog</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result5.log" target="_blank" title="Go to snippet source"></a><code class="language-log">[INFO] [07/07/2020 15:10:55.638] [run-main-0] [akka.remote.Remoting] Starting remoting
+[INFO] [07/07/2020 15:10:55.765] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 15:10:55.776] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 15:10:55.820] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 15:10:55.821] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[ERROR] [07/07/2020 15:10:55.855] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive] about to fail
+[WARN] [07/07/2020 15:10:55.869] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[ERROR] [07/07/2020 15:10:55.870] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive: exception during creation
+	at akka.actor.ActorInitializationException$.apply(Actor.scala:193)
+	at akka.actor.ActorCell.create(ActorCell.scala:608)
+...
+Caused by: java.lang.RuntimeException: Crashed for bad luck
+	at akkadesign.advance.ActorFive.&lt;init&gt;(ActorFive.scala:17)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	... 9 more
+
+[INFO] [07/07/2020 15:10:55.879] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+no libsigar-universal64-macosx.dylib in java.library.path
+org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
+	at org.hyperic.sigar.Sigar.loadLibrary(Sigar.java:174)
+
+[INFO] [07/07/2020 15:10:55.893] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+Jul 07, 2020 3:10:55 PM kamon.sigar.SigarProvisioner provision
+INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
+[INFO] [07/07/2020 15:10:56.415] [akkadesign-akka.actor.default-dispatcher-15] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+[INFO] [07/07/2020 15:10:57.857] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [1] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:10:57.857] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [2] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:10:57.858] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [3] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:10:57.858] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [4] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:10:57.858] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [5] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:10:59.861] [akkadesign-akka.actor.default-dispatcher-15] [akka://akkadesign/user/actorFive] Message [akkadesign.msg.SimpleMSG$Crash$] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [6] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:10:59.862] [akkadesign-akka.actor.default-dispatcher-15] [akka://akkadesign/user/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [7] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:10:59.862] [akkadesign-akka.actor.default-dispatcher-15] [akka://akkadesign/user/actorFive] Message [java.lang.String] without sender to Actor[akka://akkadesign/user/actorFive#-598224215] was not delivered. [8] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.</code></pre></dd>
+</dl>
+<p>Actor start failed, all messages are in dead letter mailbox</p>
+<dl>
+  <dt>Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/advance/ActorFive.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.advance
+
+import akka.actor.{Actor, ActorLogging}
+import akka.event.Logging
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+
+import scala.util.Random
+
+/**
+  * For akkadesign.advance in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
+  */
+class ActorFive extends Actor with ActorLogging {
+    val rand = Random.nextInt(5)
+    val start = if(rand != 0){
+      log.error(&quot;about to fail&quot;)
+      throw  new RuntimeException(&quot;Crashed for bad luck&quot;)
+    }
+
+  val childActor = context.actorSelection(&quot;/user/MsgActorforActorFive&quot;)
+  override def receive: Receive = {
+    case Hi =&gt; childActor ! Hi
+    case Crash =&gt; log.info(&quot;ready to crash&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case &quot;ping&quot; =&gt;sender() !&quot;pong&quot;
+    case msg =&gt; childActor ! msg
+
+  }
+}</code></pre></dd>
+  <dt>Child Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.actor.{Actor, ActorLogging}
+
+/**
+  * For akkadesign.Start in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/2/22
+  */
+class ActorTwo extends Actor with ActorLogging{
+  var msgList: List[Any] = Nil
+  def addMsg(msg:Any)={
+    msgList = msg ::msgList
+  }
+  def receive = {
+    case Hi =&gt; log.info(&quot;hi&quot;)
+      addMsg(Hi)
+      log.info(s&quot;All msg: $msgList&quot;)
+    case Crash =&gt;
+      addMsg(Crash)
+      log.info(&quot;crashing...&quot;)
+      log.info(s&quot;All msg: $msgList&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg:String=&gt; log.info(msg)
+      addMsg(msg)
+      log.info(s&quot;All msg: $msgList&quot;)
+  }
+}
+</code></pre></dd>
+  <dt>Test</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorFive2.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+
+import akka.actor.{ActorRef, ActorSystem, OneForOneStrategy, Props}
+import akka.actor.SupervisorStrategy.Restart
+import akka.util.Timeout
+import akkadesign.start.ActorTwo
+import akkadesign.advance.ActorFive
+import akkadesign.app.SimpleApp
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+import akka.pattern.ask
+
+import scala.concurrent.Await
+import scala.util.Random
+/**
+  * For akkadesign.test in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
+  */
+object TestActorFive2 {
+  def getActorFive(system:ActorSystem): ActorRef ={
+    var actfive:ActorRef = null
+    import scala.concurrent.duration._
+
+      implicit val timeout = Timeout(0.1 seconds)
+      val i = Random.nextInt(19999999)
+      actfive = system.actorOf(Props[ActorFive],&quot;actorFive&quot; + i.toString)
+      val future = actfive ? &quot;ping&quot;
+      try{
+        val result = Await.result(future, timeout.duration).asInstanceOf[String]
+          println(&quot;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;)
+          return actfive
+
+      }catch {
+        case e=&gt;println( &quot;timeout&quot;)
+      }
+
+
+
+    return null
+
+  }
+
+  def main(args: Array[String]): Unit = {
+    val system = SimpleApp.startupSingle()
+    system.actorOf(Props[ActorTwo],&quot;MsgActorforActorFive&quot;)
+    var actfive:ActorRef = null
+
+    while(actfive ==null){
+      actfive =getActorFive(system)
+    }
+    println(actfive)
+    actfive ! Hi
+    actfive ! Hi
+    actfive ! Hi
+    actfive ! Hi
+    actfive ! Hi
+    actfive ! &quot;test&quot;
+  }
+}</code></pre></dd>
+  <dt>Testlog</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result5.2.log" target="_blank" title="Go to snippet source"></a><code class="language-log">[info] Running akkadesign.test.TestActorFive2
+[INFO] [07/07/2020 16:17:44.486] [run-main-0] [akka.remote.Remoting] Starting remoting
+[INFO] [07/07/2020 16:17:44.608] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 16:17:44.620] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 16:17:44.661] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 16:17:44.661] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[WARN] [07/07/2020 16:17:44.698] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[ERROR] [07/07/2020 16:17:44.706] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive691452] about to fail
+[INFO] [07/07/2020 16:17:44.709] [akkadesign-akka.actor.default-dispatcher-5] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+[ERROR] [07/07/2020 16:17:44.719] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorFive691452] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive691452: exception during creation
+	...
+
+[INFO] [07/07/2020 16:17:44.724] [akkadesign-akka.actor.default-dispatcher-5] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+[INFO] [07/07/2020 16:17:44.726] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorFive691452] Message [java.lang.String] from Actor[akka://akkadesign/temp/$a] to Actor[akka://akkadesign/user/actorFive691452#-1280189236] was not delivered. [1] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+no libsigar-universal64-macosx.dylib in java.library.path
+org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
+...
+INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
+timeout
+[ERROR] [07/07/2020 16:17:44.810] [akkadesign-akka.actor.default-dispatcher-5] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive13162057] about to fail
+[ERROR] [07/07/2020 16:17:44.810] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive13162057] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive13162057: exception during creation
+...
+[INFO] [07/07/2020 16:17:44.811] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorFive13162057] Message [java.lang.String] from Actor[akka://akkadesign/temp/$b] to Actor[akka://akkadesign/user/actorFive13162057#-134505334] was not delivered. [2] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+timeout
+[ERROR] [07/07/2020 16:17:44.916] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive2879627] about to fail
+[ERROR] [07/07/2020 16:17:44.916] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorFive2879627] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive2879627: exception during creation
+...
+
+[INFO] [07/07/2020 16:17:44.917] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorFive2879627] Message [java.lang.String] from Actor[akka://akkadesign/temp/$c] to Actor[akka://akkadesign/user/actorFive2879627#1411953388] was not delivered. [3] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+timeout
+[ERROR] [07/07/2020 16:17:45.019] [akkadesign-akka.actor.default-dispatcher-5] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive3557565] about to fail
+[ERROR] [07/07/2020 16:17:45.020] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive3557565] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive3557565: exception during creation
+...
+
+[INFO] [07/07/2020 16:17:45.021] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorFive3557565] Message [java.lang.String] from Actor[akka://akkadesign/temp/$d] to Actor[akka://akkadesign/user/actorFive3557565#-1940252034] was not delivered. [4] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+timeout
+[ERROR] [07/07/2020 16:17:45.123] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive641744] about to fail
+[ERROR] [07/07/2020 16:17:45.124] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive641744] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive641744: exception during creation
+...
+
+[INFO] [07/07/2020 16:17:45.124] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorFive641744] Message [java.lang.String] from Actor[akka://akkadesign/temp/$e] to Actor[akka://akkadesign/user/actorFive641744#1550651214] was not delivered. [5] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+timeout
+[ERROR] [07/07/2020 16:17:45.229] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive16806259] about to fail
+[ERROR] [07/07/2020 16:17:45.229] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorFive16806259] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive16806259: exception during creation
+...
+
+[INFO] [07/07/2020 16:17:45.230] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorFive16806259] Message [java.lang.String] from Actor[akka://akkadesign/temp/$f] to Actor[akka://akkadesign/user/actorFive16806259#159089431] was not delivered. [6] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 16:17:45.258] [akkadesign-akka.actor.default-dispatcher-18] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+timeout
+[ERROR] [07/07/2020 16:17:45.333] [akkadesign-akka.actor.default-dispatcher-5] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive5125370] about to fail
+[ERROR] [07/07/2020 16:17:45.334] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive5125370] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive5125370: exception during creation
+...
+
+[INFO] [07/07/2020 16:17:45.334] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive5125370] Message [java.lang.String] from Actor[akka://akkadesign/temp/$g] to Actor[akka://akkadesign/user/actorFive5125370#200714592] was not delivered. [7] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+timeout
+[ERROR] [07/07/2020 16:17:45.437] [akkadesign-akka.actor.default-dispatcher-5] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive1371427] about to fail
+[ERROR] [07/07/2020 16:17:45.437] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive1371427] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive1371427: exception during creation
+...
+
+[INFO] [07/07/2020 16:17:45.438] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive1371427] Message [java.lang.String] from Actor[akka://akkadesign/temp/$h] to Actor[akka://akkadesign/user/actorFive1371427#-980292265] was not delivered. [8] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+timeout
+[ERROR] [07/07/2020 16:17:45.538] [akkadesign-akka.actor.default-dispatcher-5] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive13989935] about to fail
+[ERROR] [07/07/2020 16:17:45.539] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive13989935] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive13989935: exception during creation
+...
+
+[INFO] [07/07/2020 16:17:45.540] [akkadesign-akka.actor.default-dispatcher-5] [akka://akkadesign/user/actorFive13989935] Message [java.lang.String] from Actor[akka://akkadesign/temp/$i] to Actor[akka://akkadesign/user/actorFive13989935#213792023] was not delivered. [9] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+timeout
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Actor[akka://akkadesign/user/actorFive6962665#689705057]
+[INFO] [07/07/2020 16:17:45.646] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:17:45.646] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi)
+[INFO] [07/07/2020 16:17:45.646] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi)
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi, Hi)
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] test
+[INFO] [07/07/2020 16:17:45.647] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(test, Hi, Hi, Hi, Hi, Hi)</code></pre></dd>
+</dl>
+<p>For Actor start may failed, so getActorFive function will try to create ActorFive, there will have multiple timeout response for not create actor failed and finally success.</p>
+<h2><a href="#actor-with-supervisorstrategy" name="actor-with-supervisorstrategy" class="anchor"><span class="anchor-link"></span></a>Actor with supervisorStrategy</h2>
+<dl>
+  <dt>Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/advance/ActorSix.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.advance
+
+import akka.actor.SupervisorStrategy.Restart
+import akka.actor.{Actor, ActorLogging, OneForOneStrategy, Props}
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+
+import scala.concurrent.duration._
+import scala.util.Random
+
+/**
+  * For akkadesign.advance in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
+  */
+class ActorSix extends Actor with ActorLogging {
+
+  override val supervisorStrategy =
+    OneForOneStrategy(maxNrOfRetries = 20, withinTimeRange =1 minute) {
+      case _: Exception     ⇒ Restart
+    }
+  val actfive = context.actorOf(Props[ActorFive],&quot;actorFive&quot;)
+
+  val childActor = context.actorSelection(&quot;/user/MsgActorforActorSix&quot;)
+  override def receive: Receive = {
+    case Hi =&gt; actfive ! Hi
+    case Crash =&gt; log.info(&quot;ready to crash&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case msg =&gt; actfive ! msg
+  }
+}</code></pre></dd>
+  <dt>Child Actor define</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/advance/ActorFive.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.advance
+
+import akka.actor.{Actor, ActorLogging}
+import akka.event.Logging
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+
+import scala.util.Random
+
+/**
+  * For akkadesign.advance in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
+  */
+class ActorFive extends Actor with ActorLogging {
+    val rand = Random.nextInt(5)
+    val start = if(rand != 0){
+      log.error(&quot;about to fail&quot;)
+      throw  new RuntimeException(&quot;Crashed for bad luck&quot;)
+    }
+
+  val childActor = context.actorSelection(&quot;/user/MsgActorforActorFive&quot;)
+  override def receive: Receive = {
+    case Hi =&gt; childActor ! Hi
+    case Crash =&gt; log.info(&quot;ready to crash&quot;)
+      throw new RuntimeException(&quot;Crashed&quot;)
+    case &quot;ping&quot; =&gt;sender() !&quot;pong&quot;
+    case msg =&gt; childActor ! msg
+
+  }
+}</code></pre></dd>
+  <dt>Test</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorSix.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+
+import akka.actor.Props
+import akkadesign.start.ActorTwo
+import akkadesign.advance.{ActorFive, ActorSix}
+import akkadesign.app.SimpleApp
+import akkadesign.msg.SimpleMSG.{Crash, Hi}
+
+/**
+  * For akkadesign.test in AkkaDesign
+  * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
+  */
+object TestActorSix {
+  def main(args: Array[String]): Unit = {
+    val system = SimpleApp.startupSingle()
+    system.actorOf(Props[ActorTwo],&quot;MsgActorforActorSix&quot;)
+    val actorSix = system.actorOf(Props[ActorSix],&quot;actorSix&quot;)
+    Thread.sleep(1999)
+    actorSix ! Hi
+    actorSix ! Hi
+    actorSix ! Hi
+    actorSix ! Hi
+    actorSix ! Hi
+    Thread.sleep(1999)
+    actorSix ! Crash
+    actorSix ! Hi
+    actorSix ! &quot;test&quot;
+  }
+}</code></pre></dd>
+  <dt>Testlog</dt>
+  <dd>
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result6.1.log" target="_blank" title="Go to snippet source"></a><code class="language-log">[info] Running akkadesign.test.TestActorSix
+[INFO] [07/07/2020 15:25:45.570] [run-main-0] [akka.remote.Remoting] Starting remoting
+[INFO] [07/07/2020 15:25:45.695] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 15:25:45.706] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 15:25:45.749] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 15:25:45.749] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[WARN] [07/07/2020 15:25:45.786] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[ERROR] [07/07/2020 15:25:45.786] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[INFO] [07/07/2020 15:25:45.800] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+[ERROR] [07/07/2020 15:25:45.801] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.801] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.803] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.804] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+..
+
+[ERROR] [07/07/2020 15:25:45.804] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.804] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.805] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.805] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.805] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.806] [akkadesign-akka.actor.default-dispatcher-15] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.806] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.806] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.806] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.806] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.807] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.807] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.808] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.808] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.808] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.808] [akkadesign-akka.actor.default-dispatcher-17] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.809] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.809] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.809] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.809] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.810] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.810] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.810] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.810] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.811] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.811] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.811] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.811] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.811] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+no libsigar-universal64-macosx.dylib in java.library.path
+[ERROR] [07/07/2020 15:25:45.812] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+[ERROR] [07/07/2020 15:25:45.812] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+..
+[ERROR] [07/07/2020 15:25:45.812] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.812] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.813] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.813] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.813] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.814] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.814] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.815] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.816] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.816] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.816] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.817] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.817] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.817] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[INFO] [07/07/2020 15:25:45.817] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+[ERROR] [07/07/2020 15:25:45.817] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+..
+
+[ERROR] [07/07/2020 15:25:45.818] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.818] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.818] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.818] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.819] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.819] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:45.819] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:45.819] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:45.820] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+Jul 07, 2020 3:25:45 PM kamon.sigar.SigarProvisioner provision
+INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
+[INFO] [07/07/2020 15:25:46.345] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+[INFO] [07/07/2020 15:25:47.784] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorSix/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] from Actor[akka://akkadesign/user/actorSix#963812891] to Actor[akka://akkadesign/user/actorSix/actorFive#-1521203173] was not delivered. [1] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:25:47.784] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorSix/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] from Actor[akka://akkadesign/user/actorSix#963812891] to Actor[akka://akkadesign/user/actorSix/actorFive#-1521203173] was not delivered. [2] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:25:47.784] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorSix/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] from Actor[akka://akkadesign/user/actorSix#963812891] to Actor[akka://akkadesign/user/actorSix/actorFive#-1521203173] was not delivered. [3] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:25:47.784] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorSix/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] from Actor[akka://akkadesign/user/actorSix#963812891] to Actor[akka://akkadesign/user/actorSix/actorFive#-1521203173] was not delivered. [4] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:25:47.784] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorSix/actorFive] Message [akkadesign.msg.SimpleMSG$Hi$] from Actor[akka://akkadesign/user/actorSix#963812891] to Actor[akka://akkadesign/user/actorSix/actorFive#-1521203173] was not delivered. [5] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:25:49.783] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix] ready to crash
+[ERROR] [07/07/2020 15:25:49.784] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix] Crashed
+java.lang.RuntimeException: Crashed
+	at akkadesign.advance.ActorSix$$anonfun$receive$1.applyOrElse(ActorSix.scala:26)
+	at akka.actor.Actor.aroundReceive(Actor.scala:517)
+	at akka.actor.Actor.aroundReceive$(Actor.scala:515)
+	at akkadesign.advance.ActorSix.aroundReceive(ActorSix.scala:14)
+	at akka.actor.ActorCell.receiveMessage(ActorCell.scala:527)
+	at akka.actor.ActorCell.invoke(ActorCell.scala:496)
+	at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:257)
+	at akka.dispatch.Mailbox.run(Mailbox.scala:224)
+	at akka.dispatch.Mailbox.exec(Mailbox.scala:234)
+	at akka.dispatch.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)
+	at akka.dispatch.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)
+	at akka.dispatch.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)
+	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
+
+[ERROR] [07/07/2020 15:25:49.786] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.786] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.786] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.786] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.787] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.787] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.787] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.787] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.787] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.788] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.788] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.788] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.788] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.788] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	....
+
+[ERROR] [07/07/2020 15:25:49.789] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.789] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.789] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.789] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.789] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.790] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.790] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.790] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.790] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.791] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.791] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.791] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.791] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.791] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.792] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	....
+
+[ERROR] [07/07/2020 15:25:49.792] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.792] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.792] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.792] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.792] [akkadesign-akka.actor.default-dispatcher-18] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.792] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.793] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.793] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.793] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.793] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.793] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.793] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+	...
+
+[ERROR] [07/07/2020 15:25:49.794] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.794] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.794] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:49.794] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.794] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.795] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:49.795] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.795] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.795] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:49.795] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.795] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.796] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:49.796] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[ERROR] [07/07/2020 15:25:49.796] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorSix/actorFive] about to fail
+[ERROR] [07/07/2020 15:25:49.796] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorSix/actorFive] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+...
+
+[ERROR] [07/07/2020 15:25:49.796] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorSix/actorFive] changing Recreate into Create after akka.actor.ActorInitializationException: akka://akkadesign/user/actorSix/actorFive: exception during creation
+[INFO] [07/07/2020 15:25:49.799] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/MsgActorforActorFour] Message [akkadesign.msg.SimpleMSG$Hi$] from Actor[akka://akkadesign/user/actorSix/actorFive#1328370684] to Actor[akka://akkadesign/user/MsgActorforActorFour] was not delivered. [6] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.
+[INFO] [07/07/2020 15:25:49.799] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/MsgActorforActorFour] Message [java.lang.String] from Actor[akka://akkadesign/user/actorSix/actorFive#1328370684] to Actor[akka://akkadesign/user/MsgActorforActorFour] was not delivered. [7] dead letters encountered. This logging can be turned off or adjusted with configuration settings &#39;akka.log-dead-letters&#39; and &#39;akka.log-dead-letters-during-shutdown&#39;.</code></pre></dd>
+</dl>
+<p>What&rsquo;s happened?</p>
+<p>ActorFive is a child Actor of ActorSix, for ActorSix start, try to start ActorFive, after 20 times failed for ActorFive  start, all messages to ActorFive are redirect to dead letter for supervisorStrategy. </p>
+<p>And after that ActorSix receive Crash message to restart itself. Then after 20 times failed to start ActorFive. The messages to the actor are moved to dead letter mailbox for bad luck.</p>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/advanced/resilience.md">here</a>.
+</div>
+
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../advanced/resilience.html#resilience" class="header">Resilience</a>
+  <ul>
+    <li><a href="../advanced/resilience.html#actor-may-crash" class="header">Actor may crash</a></li>
+    <li><a href="../advanced/resilience.html#actor-with-supervisorstrategy" class="header">Actor with supervisorStrategy</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '9de6585c+20200707-1424', '')});</script>
+
+
+</html>
