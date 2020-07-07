@@ -26,7 +26,6 @@ object TestActorFive2 {
       val future = actfive ? "ping"
       try{
         val result = Await.result(future, timeout.duration).asInstanceOf[String]
-
           println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
           return actfive
 
@@ -42,21 +41,17 @@ object TestActorFive2 {
 
   def main(args: Array[String]): Unit = {
     val system = SimpleApp.startupSingle()
-    system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
+    system.actorOf(Props[ActorTwo],"MsgActorforActorFive")
     var actfive:ActorRef = null
 
     while(actfive ==null){
       actfive =getActorFive(system)
     }
     println(actfive)
-    Thread.sleep(1999)
     actfive ! Hi
     actfive ! Hi
     actfive ! Hi
     actfive ! Hi
-    actfive ! Hi
-    Thread.sleep(1999)
-    actfive ! Crash
     actfive ! Hi
     actfive ! "test"
   }

@@ -11,13 +11,13 @@ import scala.util.Random
   * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
   */
 class ActorFive extends Actor with ActorLogging {
-    val rand = Random.nextInt(20)
+    val rand = Random.nextInt(5)
     val start = if(rand != 0){
       log.error("about to fail")
       throw  new RuntimeException("Crashed for bad luck")
     }
 
-  val childActor = context.actorSelection("/user/MsgActorforActorFour")
+  val childActor = context.actorSelection("/user/MsgActorforActorFive")
   override def receive: Receive = {
     case Hi => childActor ! Hi
     case Crash => log.info("ready to crash")

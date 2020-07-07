@@ -13,17 +13,17 @@ import akkadesign.msg.SimpleMSG.{Crash, Hi}
 object TestActorSix {
   def main(args: Array[String]): Unit = {
     val system = SimpleApp.startupSingle()
-    system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
-    val actfive = system.actorOf(Props[ActorSix],"actorSix")
+    system.actorOf(Props[ActorTwo],"MsgActorforActorSix")
+    val actorSix = system.actorOf(Props[ActorSix],"actorSix")
     Thread.sleep(1999)
-    actfive ! Hi
-    actfive ! Hi
-    actfive ! Hi
-    actfive ! Hi
-    actfive ! Hi
+    actorSix ! Hi
+    actorSix ! Hi
+    actorSix ! Hi
+    actorSix ! Hi
+    actorSix ! Hi
     Thread.sleep(1999)
-    actfive ! Crash
-    actfive ! Hi
-    actfive ! "test"
+    actorSix ! Crash
+    actorSix ! Hi
+    actorSix ! "test"
   }
 }

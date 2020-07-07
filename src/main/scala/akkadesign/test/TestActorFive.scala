@@ -10,10 +10,10 @@ import akkadesign.msg.SimpleMSG.{Crash, Hi}
   * For akkadesign.test in AkkaDesign
   * Created by whereby[Tao Zhou](187225577@qq.com) on 2018/3/12
   */
-object TestActotFive {
+object TestActorFive {
   def main(args: Array[String]): Unit = {
     val system = SimpleApp.startupSingle()
-    system.actorOf(Props[ActorTwo],"MsgActorforActorFour")
+    system.actorOf(Props[ActorTwo],"MsgActorforActorFive")
     val actfive = system.actorOf(Props[ActorFive],"actorFive")
     Thread.sleep(1999)
     actfive ! Hi
