@@ -1,0 +1,70 @@
+[info] Running akkadesign.test.TestActorFive2
+[INFO] [07/07/2020 16:33:12.940] [run-main-0] [akka.remote.Remoting] Starting remoting
+[INFO] [07/07/2020 16:33:13.060] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 16:33:13.073] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 16:33:13.113] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 16:33:13.113] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[WARN] [07/07/2020 16:33:13.147] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don't use auto-down feature of Akka Cluster in production. See 'Auto-downing (DO NOT USE)' section of Akka Cluster documentation.
+[ERROR] [07/07/2020 16:33:13.150] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive18037224] about to fail
+[ERROR] [07/07/2020 16:33:13.162] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorFive18037224] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive18037224: exception during creation
+...
+
+[INFO] [07/07/2020 16:33:13.163] [akkadesign-akka.actor.default-dispatcher-5] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+[INFO] [07/07/2020 16:33:13.171] [akkadesign-akka.actor.default-dispatcher-19] [akka://akkadesign/user/actorFive18037224] Message [java.lang.String] from Actor[akka://akkadesign/temp/$a] to Actor[akka://akkadesign/user/actorFive18037224#1093948496] was not delivered. [1] dead letters encountered. This logging can be turned off or adjusted with configuration settings 'akka.log-dead-letters' and 'akka.log-dead-letters-during-shutdown'.
+[INFO] [07/07/2020 16:33:13.177] [akkadesign-akka.actor.default-dispatcher-5] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+no libsigar-universal64-macosx.dylib in java.library.path
+org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
+...
+INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
+timeout
+[ERROR] [07/07/2020 16:33:13.253] [akkadesign-akka.actor.default-dispatcher-5] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive17218988] about to fail
+[ERROR] [07/07/2020 16:33:13.254] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive17218988] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive17218988: exception during creation
+...
+
+[INFO] [07/07/2020 16:33:13.254] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive17218988] Message [java.lang.String] from Actor[akka://akkadesign/temp/$b] to Actor[akka://akkadesign/user/actorFive17218988#1741071950] was not delivered. [2] dead letters encountered. This logging can be turned off or adjusted with configuration settings 'akka.log-dead-letters' and 'akka.log-dead-letters-during-shutdown'.
+timeout
+[ERROR] [07/07/2020 16:33:13.357] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive6713817] about to fail
+[ERROR] [07/07/2020 16:33:13.358] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive6713817] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive6713817: exception during creation
+...
+
+[INFO] [07/07/2020 16:33:13.359] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive6713817] Message [java.lang.String] from Actor[akka://akkadesign/temp/$c] to Actor[akka://akkadesign/user/actorFive6713817#-1701988165] was not delivered. [3] dead letters encountered. This logging can be turned off or adjusted with configuration settings 'akka.log-dead-letters' and 'akka.log-dead-letters-during-shutdown'.
+timeout
+[ERROR] [07/07/2020 16:33:13.463] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive2649739] about to fail
+[ERROR] [07/07/2020 16:33:13.464] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorFive2649739] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive2649739: exception during creation
+...
+
+[INFO] [07/07/2020 16:33:13.465] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFive2649739] Message [java.lang.String] from Actor[akka://akkadesign/temp/$d] to Actor[akka://akkadesign/user/actorFive2649739#-1103392689] was not delivered. [4] dead letters encountered. This logging can be turned off or adjusted with configuration settings 'akka.log-dead-letters' and 'akka.log-dead-letters-during-shutdown'.
+timeout
+[ERROR] [07/07/2020 16:33:13.568] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive11667738] about to fail
+[ERROR] [07/07/2020 16:33:13.568] [akkadesign-akka.actor.default-dispatcher-20] [akka://akkadesign/user/actorFive11667738] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive11667738: exception during creation
+...
+
+[INFO] [07/07/2020 16:33:13.569] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorFive11667738] Message [java.lang.String] from Actor[akka://akkadesign/temp/$e] to Actor[akka://akkadesign/user/actorFive11667738#-297697274] was not delivered. [5] dead letters encountered. This logging can be turned off or adjusted with configuration settings 'akka.log-dead-letters' and 'akka.log-dead-letters-during-shutdown'.
+timeout
+[ERROR] [07/07/2020 16:33:13.670] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFive16389460] about to fail
+[ERROR] [07/07/2020 16:33:13.670] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorFive16389460] Crashed for bad luck
+akka.actor.ActorInitializationException: akka://akkadesign/user/actorFive16389460: exception during creation
+...
+
+[INFO] [07/07/2020 16:33:13.671] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorFive16389460] Message [java.lang.String] from Actor[akka://akkadesign/temp/$f] to Actor[akka://akkadesign/user/actorFive16389460#-2029477394] was not delivered. [6] dead letters encountered. This logging can be turned off or adjusted with configuration settings 'akka.log-dead-letters' and 'akka.log-dead-letters-during-shutdown'.
+[INFO] [07/07/2020 16:33:13.709] [akkadesign-akka.actor.default-dispatcher-17] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+timeout
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Actor[akka://akkadesign/user/actorFive17165870#178763894]
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi)
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi)
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi, Hi)
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:33:13.776] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 16:33:13.777] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] hi
+[INFO] [07/07/2020 16:33:13.777] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(Hi, Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 16:33:13.777] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] test
+[INFO] [07/07/2020 16:33:13.777] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFive] All msg: List(test, Hi, Hi, Hi, Hi, Hi)

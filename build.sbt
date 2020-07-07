@@ -11,11 +11,11 @@ lazy val appResolvers = Seq(
   "typesafe" at "http://repo.typesafe.com/typesafe/releases/",
   "hydrasonatype" at "https://oss.sonatype.org/content/groups/staging/"
 )
-lazy val `AkkaDesign` = project
+lazy val `akkadesign` = project
   .in(file("."))
   .settings(multiJvmSettings: _*)
   .settings(
-    name := "AkkaDesign",
+    name := "akkadesign",
     version := "0.2.1",
     organization := "io.github.wherby",
     scalaVersion := "2.12.2",

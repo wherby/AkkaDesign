@@ -1,0 +1,32 @@
+[INFO] [07/07/2020 17:05:55.365] [run-main-0] [akka.remote.Remoting] Starting remoting
+[INFO] [07/07/2020 17:05:55.492] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 17:05:55.504] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 17:05:55.551] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 17:05:55.551] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[WARN] [07/07/2020 17:05:55.590] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don't use auto-down feature of Akka Cluster in production. See 'Auto-downing (DO NOT USE)' section of Akka Cluster documentation.
+[INFO] [07/07/2020 17:05:55.595] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.597] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:55.599] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+[INFO] [07/07/2020 17:05:55.609] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+no libsigar-universal64-macosx.dylib in java.library.path
+org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
+...
+INFO: Sigar library provisioned: /data/software/akkadesign/target/native/libsigar-universal64-macosx.dylib
+[INFO] [07/07/2020 17:05:56.136] [akkadesign-akka.actor.default-dispatcher-16] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+[INFO] [07/07/2020 17:05:57.599] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFour] ready to crash
+[ERROR] [07/07/2020 17:05:57.607] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFour] Crashed
+java.lang.RuntimeException: Crashed
+...
+
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] test
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(test, Hi, Hi, Hi, Hi, Hi, Hi)

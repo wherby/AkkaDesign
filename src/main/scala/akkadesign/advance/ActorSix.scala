@@ -14,7 +14,7 @@ import scala.util.Random
 class ActorSix extends Actor with ActorLogging {
 
   override val supervisorStrategy =
-    OneForOneStrategy(maxNrOfRetries = 20, withinTimeRange =1 minute) {
+    OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange =10 seconds) {
       case _: Exception     ⇒ Restart
     }
   val actfive = context.actorOf(Props[ActorFive],"actorFive")

@@ -30,7 +30,7 @@
 <span class="home-icon">⌂</span>Akka design
 </a>
 <div class="version-number">
-9de6585c+20200707-1424
+61fc0e1d+20200707-1700
 </div>
 </div>
 <div class="nav-toc">
@@ -72,7 +72,7 @@ C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.
 <span class="home-icon">⌂</span>Akka design
 </a>
 <div class="version-number">
-9de6585c+20200707-1424
+61fc0e1d+20200707-1700
 </div>
 </div>
 <div class="nav-toc">
@@ -113,7 +113,7 @@ C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.
 <dl>
   <dt>Actor define</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorThree.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/start/ActorThree.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.{Actor, ActorLogging, Props}
@@ -133,7 +133,7 @@ class ActorThree extends Actor with ActorLogging {
 }</code></pre></dd>
   <dt>Child Actor define</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.{Actor, ActorLogging}
@@ -164,7 +164,7 @@ class ActorTwo extends Actor with ActorLogging{
 </code></pre></dd>
   <dt>Test</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorThree.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/test/TestActorThree.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.Props
@@ -193,36 +193,39 @@ object TestActorThree {
 </code></pre></dd>
   <dt>Testlog</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result3.log" target="_blank" title="Go to snippet source"></a><code class="language-log">[INFO] [07/07/2020 14:23:02.344] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
-[INFO] [07/07/2020 14:23:02.377] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
-[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi)
-[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
-[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi)
-[INFO] [07/07/2020 14:23:02.378] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
-[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi)
-[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
-[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi, Hi)
-[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
-[INFO] [07/07/2020 14:23:02.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi, Hi, Hi)
-[WARN] [07/07/2020 14:23:02.382] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
-[INFO] [07/07/2020 14:23:02.390] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
-[INFO] [07/07/2020 14:23:02.401] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/docs/src/main/paradox/log/result3.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt"><br/>[info] Running akkadesign.test.TestActorThree
+[INFO] [07/07/2020 17:03:48.125] [run-main-0] [akka.remote.Remoting] Starting remoting
+[INFO] [07/07/2020 17:03:48.255] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 17:03:48.267] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 17:03:48.312] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 17:03:48.312] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[INFO] [07/07/2020 17:03:48.348] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 17:03:48.348] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi)
+[INFO] [07/07/2020 17:03:48.348] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi)
+[INFO] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi)
+[INFO] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi, Hi, Hi, Hi, Hi)
+[WARN] [07/07/2020 17:03:48.349] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[INFO] [07/07/2020 17:03:48.360] [akkadesign-akka.actor.default-dispatcher-4] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
 no libsigar-universal64-macosx.dylib in java.library.path
 org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
-	at org.hyperic.sigar.Sigar.loadLibrary(Sigar.java:174)
-	...
-	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
-Jul 07, 2020 2:23:02 PM kamon.sigar.SigarProvisioner provision
-INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
-[INFO] [07/07/2020 14:23:02.931] [akkadesign-akka.actor.default-dispatcher-17] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
-[INFO] [07/07/2020 14:23:04.379] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree] ready to crash
-[ERROR] [07/07/2020 14:23:04.388] [akkadesign-akka.actor.default-dispatcher-18] [akka://akkadesign/user/actorThree] Crashed
 ...
-
-[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
-[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi)
-[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] test
-[INFO] [07/07/2020 14:23:04.394] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(test, Hi)</code></pre></dd>
+[INFO] [07/07/2020 17:03:48.371] [akkadesign-akka.actor.default-dispatcher-4] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
+Jul 07, 2020 5:03:48 PM kamon.sigar.SigarProvisioner provision
+INFO: Sigar library provisioned: /data/software/akkadesign/target/native/libsigar-universal64-macosx.dylib
+[INFO] [07/07/2020 17:03:48.896] [akkadesign-akka.actor.default-dispatcher-17] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+[INFO] [07/07/2020 17:03:50.347] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree] ready to crash
+[ERROR] [07/07/2020 17:03:50.357] [akkadesign-akka.actor.default-dispatcher-3] [akka://akkadesign/user/actorThree] Crashed
+java.lang.RuntimeException: Crashed
+...
+[INFO] [07/07/2020 17:03:50.362] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] hi
+[INFO] [07/07/2020 17:03:50.363] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(Hi)
+[INFO] [07/07/2020 17:03:50.363] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] test
+[INFO] [07/07/2020 17:03:50.363] [akkadesign-akka.actor.default-dispatcher-17] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorThree/childActorforActorThree] All msg: List(test, Hi)</code></pre></dd>
 </dl>
 <p>Parent Actor will restart child actor by default.</p>
 <h2><a href="#version-2" name="version-2" class="anchor"><span class="anchor-link"></span></a>Version 2</h2>
@@ -230,7 +233,7 @@ INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsiga
 <dl>
   <dt>Actor define</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorFour.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/start/ActorFour.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.{Actor, ActorLogging}
@@ -250,7 +253,7 @@ class ActorFour extends Actor with ActorLogging {
 }</code></pre></dd>
   <dt>Another Actor define</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.{Actor, ActorLogging}
@@ -281,7 +284,7 @@ class ActorTwo extends Actor with ActorLogging{
 </code></pre></dd>
   <dt>Test</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorFour.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/test/TestActorFour.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.Props
@@ -310,40 +313,41 @@ object TestActorFour {
 }</code></pre></dd>
   <dt>Testlog</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result4.log" target="_blank" title="Go to snippet source"></a><code class="language-log">[INFO] [07/07/2020 14:56:15.889] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
-[INFO] [07/07/2020 14:56:15.901] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
-[INFO] [07/07/2020 14:56:15.945] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
-[INFO] [07/07/2020 14:56:15.945] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
-[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
-[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi)
-[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
-[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi)
-[INFO] [07/07/2020 14:56:15.977] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
-[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi)
-[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
-[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi)
-[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
-[INFO] [07/07/2020 14:56:15.978] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi)
-[WARN] [07/07/2020 14:56:15.982] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
-[INFO] [07/07/2020 14:56:15.993] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/docs/src/main/paradox/log/result4.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt">[INFO] [07/07/2020 17:05:55.365] [run-main-0] [akka.remote.Remoting] Starting remoting
+[INFO] [07/07/2020 17:05:55.492] [run-main-0] [akka.remote.Remoting] Remoting started; listening on addresses :[akka.tcp://akkadesign@127.0.0.1:2551]
+[INFO] [07/07/2020 17:05:55.504] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Starting up...
+[INFO] [07/07/2020 17:05:55.551] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Registered cluster JMX MBean [akka:type=Cluster,port=2551]
+[INFO] [07/07/2020 17:05:55.551] [run-main-0] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Started up successfully
+[WARN] [07/07/2020 17:05:55.590] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
+[INFO] [07/07/2020 17:05:55.595] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:55.596] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:55.597] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:55.599] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Node [akka.tcp://akkadesign@127.0.0.1:2551] is JOINING, roles [hydra, dc-default]
+[INFO] [07/07/2020 17:05:55.609] [akkadesign-akka.actor.default-dispatcher-2] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
 no libsigar-universal64-macosx.dylib in java.library.path
 org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
 ...
-	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
-[INFO] [07/07/2020 14:56:16.005] [akkadesign-akka.actor.default-dispatcher-3] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Leader is moving node [akka.tcp://akkadesign@127.0.0.1:2551] to [Up]
-Jul 07, 2020 2:56:16 PM kamon.sigar.SigarProvisioner provision
-INFO: Sigar library provisioned: /data/software/AkkaDesign/target/native/libsigar-universal64-macosx.dylib
-[INFO] [07/07/2020 14:56:16.526] [akkadesign-akka.actor.default-dispatcher-16] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
-[INFO] [07/07/2020 14:56:17.980] [akkadesign-akka.actor.default-dispatcher-2] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFour] ready to crash
-[ERROR] [07/07/2020 14:56:17.988] [akkadesign-akka.actor.default-dispatcher-2] [akka://akkadesign/user/actorFour] Crashed
+INFO: Sigar library provisioned: /data/software/akkadesign/target/native/libsigar-universal64-macosx.dylib
+[INFO] [07/07/2020 17:05:56.136] [akkadesign-akka.actor.default-dispatcher-16] [akka.cluster.Cluster(akka://akkadesign)] Cluster Node [akka.tcp://akkadesign@127.0.0.1:2551] - Metrics collection has started successfully
+[INFO] [07/07/2020 17:05:57.599] [akkadesign-akka.actor.default-dispatcher-16] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorFour] ready to crash
+[ERROR] [07/07/2020 17:05:57.607] [akkadesign-akka.actor.default-dispatcher-16] [akka://akkadesign/user/actorFour] Crashed
+java.lang.RuntimeException: Crashed
 ...
-[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
-[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi, Hi)
-[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] test
-[INFO] [07/07/2020 14:56:17.991] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(test, Hi, Hi, Hi, Hi, Hi, Hi)</code></pre></dd>
+
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] hi
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(Hi, Hi, Hi, Hi, Hi, Hi)
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] test
+[INFO] [07/07/2020 17:05:57.610] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/MsgActorforActorFour] All msg: List(test, Hi, Hi, Hi, Hi, Hi, Hi)</code></pre></dd>
 </dl>
 <div class="source-github">
-The source code for this page can be found <a href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/isolatedactor/index.md">here</a>.
+The source code for this page can be found <a href="https://github.com/wherby/akkadesign/tree/master/docs/src/main/paradox/isolatedactor/index.md">here</a>.
 </div>
 
 <div class="nav-next">
@@ -427,7 +431,7 @@ The source code for this page can be found <a href="https://github.com/wherby/Ak
 <script type="text/javascript" src="../lib/prettify/prettify.js"></script>
 <script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
 <script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
-<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '9de6585c+20200707-1424', '')});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '61fc0e1d+20200707-1700', '')});</script>
 
 
 </html>

@@ -3,11 +3,11 @@
 lazy val docs = (project in file("docs"))
   .enablePlugins(ParadoxPlugin)
   .settings(
-    name := "document for doradilla",
+    name := "document for akka design",
     paradoxTheme := Some(builtinParadoxTheme("generic")),
     paradoxIllegalLinkPath := raw".*\\.md".r,
     paradoxProperties in Compile ++=Map("project.description" -> "Akka design case",
-      "github.base_url" -> s"https://github.com/wherby/AkkaDesign/tree/master")
+      "github.base_url" -> s"https://github.com/wherby/akkadesign/tree/master")
   )
 
 

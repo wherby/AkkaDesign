@@ -20,7 +20,7 @@ Test
 : @@snip [Testactor](/src/main/scala/akkadesign/test/TestActorThree.scala)
 
 Testlog
-: @@snip [TestLog](../log/result3.log)
+: @@snip [TestLog](../log/result3.txt)
 
 Parent Actor will restart child actor by default.
 
@@ -38,5 +38,5 @@ Test
 : @@snip [Testactor](/src/main/scala/akkadesign/test/TestActorFour.scala)
 
 Testlog
-: @@snip [TestLog](../log/result4.log)
+: @@snip [TestLog](../log/result4.txt)
 

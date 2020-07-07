@@ -30,7 +30,7 @@
 <span class="home-icon">⌂</span>Akka design
 </a>
 <div class="version-number">
-9de6585c+20200707-1424
+61fc0e1d+20200707-1700
 </div>
 </div>
 <div class="nav-toc">
@@ -72,7 +72,7 @@ C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.
 <span class="home-icon">⌂</span>Akka design
 </a>
 <div class="version-number">
-9de6585c+20200707-1424
+61fc0e1d+20200707-1700
 </div>
 </div>
 <div class="nav-toc">
@@ -112,7 +112,7 @@ C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.
 <dl>
   <dt>Actor define</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorOne.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/start/ActorOne.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
 
 import akkadesign.msg.SimpleMSG._
 import akka.actor.{Actor, ActorLogging}
@@ -133,7 +133,7 @@ class ActorOne extends Actor with ActorLogging{
 }</code></pre></dd>
   <dt>Msg define</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/msg/SimpleMSG.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.msg
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/msg/SimpleMSG.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.msg
 
 /**
   * For akkadesign.msg in AkkaDesign
@@ -150,7 +150,7 @@ object SimpleMSG {
 }</code></pre></dd>
   <dt>Test</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorOne.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/test/TestActorOne.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
 
 import akkadesign.msg.SimpleMSG._
 import akka.actor.Props
@@ -172,7 +172,7 @@ object TestActorOne {
 }</code></pre></dd>
   <dt>Testlog</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result1.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt">[INFO] [07/01/2020 17:42:38.654] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorOne] hi
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/docs/src/main/paradox/log/result1.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt">[INFO] [07/01/2020 17:42:38.654] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorOne] hi
 [INFO] [07/01/2020 17:42:38.654] [akkadesign-akka.actor.default-dispatcher-4] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorOne] crashing...
 [WARN] [07/01/2020 17:42:38.657] [akkadesign-akka.actor.default-dispatcher-15] [akka.tcp://akkadesign@127.0.0.1:2551/system/cluster/core/daemon/downingProvider] Don&#39;t use auto-down feature of Akka Cluster in production. See &#39;Auto-downing (DO NOT USE)&#39; section of Akka Cluster documentation.
 [ERROR] [07/01/2020 17:42:38.664] [akkadesign-akka.actor.default-dispatcher-4] [akka://akkadesign/user/actorOne] Crashed
@@ -199,7 +199,7 @@ java.lang.RuntimeException: Crashed
 <dl>
   <dt>Actor define</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/start/ActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.start
 
 import akkadesign.msg.SimpleMSG.{Crash, Hi}
 import akka.actor.{Actor, ActorLogging}
@@ -230,7 +230,7 @@ class ActorTwo extends Actor with ActorLogging{
 </code></pre></dd>
   <dt>Test</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/src/main/scala/akkadesign/test/TestActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/src/main/scala/akkadesign/test/TestActorTwo.scala" target="_blank" title="Go to snippet source"></a><code class="language-scala">package akkadesign.test
 import akkadesign.msg.SimpleMSG._
 import akka.actor.Props
 import akkadesign.start.{ ActorTwo}
@@ -252,7 +252,7 @@ def main(args: Array[String]): Unit = {
 }</code></pre></dd>
   <dt>Testlog</dt>
   <dd>
-  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/log/result2.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt">[INFO] [07/01/2020 17:49:25.028] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] hi
+  <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/wherby/akkadesign/tree/master/docs/src/main/paradox/log/result2.txt" target="_blank" title="Go to snippet source"></a><code class="language-txt">[INFO] [07/01/2020 17:49:25.028] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] hi
 [INFO] [07/01/2020 17:49:25.028] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] All msg: List(Hi)
 [INFO] [07/01/2020 17:49:25.029] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] crashing...
 [INFO] [07/01/2020 17:49:25.029] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] All msg: List(Crash, Hi)
@@ -279,7 +279,7 @@ java.lang.RuntimeException: Crashed
 [INFO] [07/01/2020 17:49:25.043] [akkadesign-akka.actor.default-dispatcher-3] [akka.tcp://akkadesign@127.0.0.1:2551/user/actorTwo] All msg: List(test, Hi)</code></pre></dd>
 </dl>
 <div class="source-github">
-The source code for this page can be found <a href="https://github.com/wherby/AkkaDesign/tree/master/docs/src/main/paradox/simpleactor/simpleactor.md">here</a>.
+The source code for this page can be found <a href="https://github.com/wherby/akkadesign/tree/master/docs/src/main/paradox/simpleactor/simpleactor.md">here</a>.
 </div>
 
 <div class="nav-next">
@@ -363,7 +363,7 @@ The source code for this page can be found <a href="https://github.com/wherby/Ak
 <script type="text/javascript" src="../lib/prettify/prettify.js"></script>
 <script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
 <script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
-<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '9de6585c+20200707-1424', '')});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '61fc0e1d+20200707-1700', '')});</script>
 
 
 </html>
